@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SKITMC | OVERDRIVE</title>
+    <title>OVERDRIVE</title>
     <link rel="icon" type="image/png" href="assets/clicker.png">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
     <style>
@@ -18,177 +18,144 @@
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
         
         body { 
-            background: var(--bg); 
-            color: #fff; 
-            font-family: 'Orbitron', sans-serif;
+            background: var(--bg); color: #fff; font-family: 'Orbitron', sans-serif;
             height: 100vh; display: flex; flex-direction: column; overflow: hidden;
         }
 
         canvas { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 100; }
 
+        /* Slim Header */
         header {
-            background: var(--panel);
-            padding: 20px 40px;
-            border-bottom: 1px solid #222;
-            display: flex; flex-direction: column; align-items: center;
-            z-index: 10; gap: 15px;
-            position: relative;
+            background: var(--panel); padding: 0 40px; border-bottom: 1px solid #222;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 10; height: 50px;
         }
 
         .main-title {
-            font-size: 2.5rem;
-            font-weight: 900;
-            text-transform: uppercase;
+            font-size: 1.5rem; font-weight: 900; text-transform: uppercase;
             background: linear-gradient(to bottom, var(--yellow), var(--orange));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 10px rgba(255, 102, 0, 0.3));
-            letter-spacing: 8px;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            letter-spacing: 6px;
         }
 
-        /* Battery Bar */
+        .header-stats { display: flex; align-items: center; gap: 20px; }
+
+        .level-badge {
+            background: var(--orange); color: #000; padding: 2px 10px;
+            font-weight: 900; font-size: 0.8rem; border-radius: 3px;
+        }
+
         .battery-container {
-            width: 600px; height: 18px; border: 1px solid #333;
+            width: 250px; height: 10px; border: 1px solid #333;
             background: #000; position: relative; overflow: hidden;
         }
         #battery-fill {
-            height: 100%; width: 0%;
-            background: linear-gradient(90deg, #664400, var(--yellow));
-            box-shadow: 0 0 15px var(--orange);
-            transition: width 0.4s ease;
+            height: 100%; width: 0%; background: var(--yellow);
+            box-shadow: 0 0 10px var(--orange); transition: width 0.4s ease;
         }
-        .battery-spark {
-            position: absolute; top: 0; width: 50px; height: 100%;
-            background: linear-gradient(90deg, transparent, #fff, transparent);
-            opacity: 0.5; animation: surge 4s infinite linear;
-        }
-        @keyframes surge { 0% { left: -100px; } 100% { left: 700px; } }
 
-        /* Settings Gear */
-        #settings-toggle {
-            position: absolute; top: 25px; right: 40px; font-size: 1.8rem;
-            cursor: pointer; color: var(--yellow); z-index: 200; transition: transform 0.3s;
-        }
-        #settings-toggle:hover { transform: rotate(90deg); }
+        #settings-toggle { font-size: 1.2rem; cursor: pointer; color: var(--yellow); }
 
         #settings-menu {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: var(--panel); border: 2px solid var(--orange); padding: 30px;
-            z-index: 300; display: none; width: 350px; box-shadow: 0 0 50px #000;
+            background: var(--panel); border: 2px solid var(--orange); padding: 25px;
+            z-index: 300; display: none; width: 320px;
         }
-        .setting-item { display: flex; justify-content: space-between; margin-bottom: 20px; align-items: center; }
-        .setting-item input { width: 20px; height: 20px; cursor: pointer; accent-color: var(--yellow); }
 
         main { display: flex; flex: 1; overflow: hidden; z-index: 5; }
 
         .reactor-section {
             flex: 1.5; display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            position: relative; border-right: 1px solid var(--border);
-            background: radial-gradient(circle at center, #0a0a15 0%, #030305 100%);
+            align-items: center; justify-content: center; position: relative;
+            border-right: 1px solid var(--border);
         }
 
         #score-text { 
-            font-size: 6rem; font-weight: 900; color: #fff;
-            text-shadow: 0 0 30px var(--orange);
-            font-family: 'JetBrains Mono', monospace;
+            font-size: 5.5rem; font-weight: 900; color: #fff;
+            text-shadow: 0 0 20px var(--orange); font-family: 'JetBrains Mono';
         }
-        #pps-text { color: var(--yellow); font-size: 1.2rem; margin-top: -10px; margin-bottom: 30px; opacity: 0.8; }
+        #pps-text { color: var(--yellow); font-size: 1rem; margin-bottom: 20px; opacity: 0.7; }
 
         .core-wrapper {
-            position: relative; width: 340px; height: 340px;
+            position: relative; width: 300px; height: 300px;
             cursor: pointer; transition: transform 0.05s;
         }
-        .core-wrapper:active { transform: scale(0.92); }
-        .core-wrapper img { width: 100%; height: 100%; filter: drop-shadow(0 0 25px var(--orange)); }
+        .core-wrapper:active { transform: scale(0.94); }
+        .core-wrapper img { width: 100%; height: 100%; filter: drop-shadow(0 0 20px var(--orange)); }
 
         .shop-section { flex: 1; background: #08080a; display: flex; flex-direction: column; }
-        .shop-head { padding: 20px; font-weight: 900; color: var(--orange); border-bottom: 1px solid #111; font-size: 0.8rem; letter-spacing: 2px; }
-        #upgrade-list { flex: 1; overflow-y: auto; padding: 20px; }
+        #upgrade-list { flex: 1; overflow-y: auto; padding: 15px; }
 
         .item {
-            background: #0d0d12; border: 1px solid #1a1a1a;
-            padding: 18px; margin-bottom: 12px;
-            display: flex; justify-content: space-between; align-items: center;
-            cursor: pointer; transition: 0.3s;
+            background: #0d0d12; border: 1px solid #1a1a1a; padding: 14px;
+            margin-bottom: 8px; display: flex; justify-content: space-between;
+            align-items: center; cursor: pointer;
         }
         .item:hover:not(.locked) { border-color: var(--yellow); background: #14141c; }
-        .item.locked { opacity: 0.2; cursor: not-allowed; filter: grayscale(1); }
-        .item-info h4 { color: #fff; font-size: 0.9rem; margin-bottom: 4px; }
-        .item-info p { color: #555; font-size: 0.7rem; font-family: sans-serif; }
-        .item-cost { color: var(--yellow); font-weight: 900; font-size: 1.1rem; }
+        .item.locked { opacity: 0.15; cursor: not-allowed; }
+        .item-info h4 { font-size: 0.85rem; color: var(--yellow); }
+        .item-info p { font-size: 0.65rem; color: #555; }
 
         .pop {
-            position: absolute; pointer-events: none;
-            color: var(--yellow); font-weight: 900;
-            animation: float 0.7s ease-out forwards; z-index: 101;
-            font-family: 'JetBrains Mono';
+            position: absolute; pointer-events: none; color: var(--yellow);
+            font-weight: 900; font-size: 1.8rem; z-index: 101;
+            font-family: 'JetBrains Mono'; animation: float 0.7s ease-out forwards;
         }
-        @keyframes float { 0% { opacity:1; transform:translateY(0); } 100% { opacity:0; transform:translateY(-100px); } }
+        @keyframes float { 0% { opacity:1; transform:translateY(0); } 100% { opacity:0; transform:translateY(-120px); } }
 
         footer {
-            background: #000; padding: 15px 40px;
-            border-top: 1px solid #111;
-            display: flex; justify-content: space-between; align-items: center;
-            font-size: 0.75rem; color: #444;
+            background: #000; padding: 0 40px; height: 45px;
+            border-top: 1px solid #111; display: flex;
+            justify-content: space-between; align-items: center;
+            font-size: 0.7rem; color: #444;
         }
-        .dev-portal {
-            background: #fff; color: #000; padding: 8px 20px;
-            text-decoration: none; font-weight: 900; border-radius: 2px;
-            transition: 0.3s;
-        }
-        .dev-portal:hover { background: var(--yellow); box-shadow: 0 0 20px var(--yellow); }
+        .dev-portal { background: #fff; color: #000; padding: 4px 12px; text-decoration: none; font-weight: 900; }
 
         .shake { animation: shakeAnim 0.1s linear 2; }
-        @keyframes shakeAnim { 
-            0% { transform: translate(2px, 2px); } 
-            50% { transform: translate(-2px, -2px); } 
-            100% { transform: translate(0, 0); } 
-        }
+        @keyframes shakeAnim { 0% { transform: translate(2px, 2px); } 50% { transform: translate(-2px, -2px); } 100% { transform: translate(0, 0); } }
     </style>
 </head>
 <body>
 
 <canvas id="lightning"></canvas>
-<div id="settings-toggle" onclick="toggleSettings()">⚙️</div>
 
 <div id="settings-menu">
-    <h3 style="color:var(--orange); margin-bottom: 25px; text-align: center;">SYSTEM SETTINGS</h3>
-    <div class="setting-item"><span>Animations</span><input type="checkbox" id="anim-toggle" checked></div>
-    <div class="setting-item"><span>Background Music</span><input type="checkbox" id="music-toggle" onchange="updateMusic()"></div>
-    <div class="setting-item"><span>Purchase SFX</span><input type="checkbox" id="sfx-toggle" checked></div>
-    <button onclick="toggleSettings()" style="width:100%; background:var(--yellow); border:none; padding:12px; margin-top:10px; cursor:pointer; font-weight:900; font-family: 'Orbitron';">CLOSE</button>
+    <h3 style="color:var(--orange); margin-bottom: 20px; text-align: center;">SYSTEM</h3>
+    <div style="display:flex; justify-content:space-between; margin-bottom:15px;"><span>Visual FX</span><input type="checkbox" id="anim-toggle" checked></div>
+    <div style="display:flex; justify-content:space-between; margin-bottom:15px;"><span>Background Music</span><input type="checkbox" id="music-toggle" onchange="updateMusic()"></div>
+    <div style="display:flex; justify-content:space-between; margin-bottom:15px;"><span>Purchase SFX</span><input type="checkbox" id="sfx-toggle" checked></div>
+    <button onclick="toggleSettings()" style="width:100%; background:var(--yellow); border:none; padding:10px; cursor:pointer; font-weight:900;">BACK</button>
 </div>
 
 <header>
-    <div class="main-title">SKITMC OVERDRIVE</div>
-    <div class="battery-container">
-        <div id="battery-fill"></div>
-        <div class="battery-spark"></div>
+    <div class="main-title">OVERDRIVE</div>
+    <div class="header-stats">
+        <div class="level-badge">LVL <span id="level-num">1</span></div>
+        <div class="battery-container">
+            <div id="battery-fill"></div>
+        </div>
     </div>
+    <div id="settings-toggle" onclick="toggleSettings()">⚙️</div>
 </header>
 
 <main>
     <section class="reactor-section" id="shake-target">
         <div id="score-text">0</div>
         <div id="pps-text">0.0 WATTS / SEC</div>
-        
         <div class="core-wrapper" id="core-btn">
-            <img src="assets/clicker.png" alt="CORE">
+            <img src="assets/clicker.png" id="core-img">
         </div>
-        <div id="rebirth-ui" style="display:none; margin-top:20px; color:var(--orange); border:1px solid var(--orange); padding:10px; cursor:pointer;" onclick="prestige()">SYSTEM REBIRTH AVAILABLE</div>
     </section>
 
     <section class="shop-section">
-        <div class="shop-head">SUBSYSTEMS_MENU</div>
         <div id="upgrade-list"></div>
     </section>
 </main>
 
 <footer>
-    <div>AUTO: <span id="stat-pps">0</span> | MANUAL: <span id="stat-ppc">1</span> | LVL: <span id="level-txt">1</span></div>
-    <div style="display:flex; align-items:center; gap:20px;">
-        <span>IF YOU WANT TO LEARN MORE ABOUT THE DEVELOPER CLICK!</span>
+    <div>AUTO: <span id="stat-pps">0</span> | MANUAL: <span id="stat-ppc">1</span></div>
+    <div style="display:flex; align-items:center; gap:15px;">
+        <span>IF YOU WANT TO MORE LEARN ABOUT THE DEVELOPER CLICK!</span>
         <a href="https://skitmc.github.io/" target="_blank" class="dev-portal">DEVELOPER</a>
     </div>
 </footer>
@@ -198,7 +165,6 @@
     const canvas = document.getElementById('lightning');
     const ctx = canvas.getContext('2d');
     
-    // Sounds
     const bgMusic = new Audio('sounds/backround_sound.mp3');
     bgMusic.loop = true;
     const buySfx = new Audio('sounds/purcahsesucsess.mp3');
@@ -235,17 +201,6 @@
         else bgMusic.pause();
     }
 
-    function init() {
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        load();
-        setInterval(tick, 100);
-        setInterval(save, 5000);
-        
-        window.addEventListener('keydown', (e) => { if(e.code === "Space") { e.preventDefault(); doClick(); }});
-        document.getElementById('core-btn').addEventListener('mousedown', (e) => { doClick(e); });
-        renderShop();
-    }
-
     function doClick(e) {
         let mult = (1 + (level - 1) * 0.1) * Math.pow(5, rebirths);
         let basePPC = 1;
@@ -255,21 +210,32 @@
         watts += val;
         totalEver += val;
         
+        // Handle Visuals
         if(document.getElementById('anim-toggle').checked) {
             sparkEffect();
             document.getElementById('shake-target').classList.add('shake');
             setTimeout(() => document.getElementById('shake-target').classList.remove('shake'), 100);
         }
-        
-        if(e) popEffect(e.clientX, e.clientY, val);
-        updateUI(mult);
+
+        // Animation Position
+        let x, y;
+        if(e) {
+            x = e.clientX; y = e.clientY;
+        } else {
+            // Spacebar/Auto-center logic
+            const rect = document.getElementById('core-img').getBoundingClientRect();
+            x = rect.left + rect.width / 2;
+            y = rect.top + rect.height / 2;
+        }
+        popEffect(x, y, val);
+        updateUI();
     }
 
     function sparkEffect() {
         ctx.clearRect(0,0,canvas.width,canvas.height);
         ctx.strokeStyle = "#fff"; ctx.lineWidth = 2;
         ctx.beginPath();
-        let x = window.innerWidth * 0.38, y = window.innerHeight * 0.55;
+        let x = window.innerWidth * 0.38, y = window.innerHeight * 0.5;
         ctx.moveTo(x,y);
         for(let i=0; i<6; i++){
             x += (Math.random()-0.5)*400; y += (Math.random()-0.5)*400;
@@ -281,8 +247,8 @@
 
     function popEffect(x, y, v) {
         const p = document.createElement('div');
-        p.className = 'pop'; p.style.left = x+'px'; p.style.top = y+'px';
-        p.innerText = "+"+format(v);
+        p.className = 'pop'; p.style.left = (x - 20) + 'px'; p.style.top = y + 'px';
+        p.innerText = "+" + format(v);
         document.body.appendChild(p);
         setTimeout(() => p.remove(), 600);
     }
@@ -303,10 +269,11 @@
     }
 
     function updateUI(mult, pps = 0) {
+        if(!mult) mult = (1 + (level - 1) * 0.1) * Math.pow(5, rebirths);
         document.getElementById('score-text').innerText = format(watts);
         document.getElementById('pps-text').innerText = format(pps * mult) + " WATTS / SEC";
         document.getElementById('stat-pps').innerText = format(pps * mult);
-        document.getElementById('level-txt').innerText = level;
+        document.getElementById('level-num').innerText = level;
         
         let ppc = 1;
         catalog.forEach((u, i) => { if(u.type === "click") ppc += (u.power * owned[i]); });
@@ -316,8 +283,6 @@
         let nxtReq = 100 * Math.pow(level, 2.5);
         let progress = ((totalEver - curReq) / (nxtReq - curReq)) * 100;
         document.getElementById('battery-fill').style.width = Math.min(100, progress) + "%";
-        
-        document.getElementById('rebirth-ui').style.display = (level >= 15) ? "block" : "none";
         
         const uiItems = document.querySelectorAll('.item');
         catalog.forEach((u, i) => {
@@ -351,25 +316,15 @@
                     <h4>${u.name} [Lv.${owned[i]}]</h4>
                     <p>${u.desc}</p>
                 </div>
-                <div class="item-cost">${format(cost)}</div>
+                <div style="color:var(--orange); font-weight:900;">${format(cost)}</div>
             `;
             container.appendChild(el);
         });
     }
 
-    function prestige() {
-        if(confirm("REBIRTH? Reset infrastructure for a 500% power boost?")) {
-            rebirths++;
-            watts = 0; totalEver = 0; level = 1;
-            owned.fill(0);
-            save();
-            location.reload();
-        }
-    }
-
-    function save() { localStorage.setItem('skit_save_final', JSON.stringify({watts, totalEver, level, rebirths, owned})); }
+    function save() { localStorage.setItem('overdrive_save', JSON.stringify({watts, totalEver, level, rebirths, owned})); }
     function load() {
-        let d = JSON.parse(localStorage.getItem('skit_save_final'));
+        let d = JSON.parse(localStorage.getItem('overdrive_save'));
         if(d) {
             watts = d.watts || 0; totalEver = d.totalEver || 0;
             level = d.level || 1; rebirths = d.rebirths || 0;
@@ -377,7 +332,13 @@
         }
     }
 
-    init();
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    load();
+    setInterval(tick, 100);
+    setInterval(save, 5000);
+    document.getElementById('core-btn').addEventListener('mousedown', (e) => doClick(e));
+    window.addEventListener('keydown', (e) => { if(e.code === "Space") { e.preventDefault(); doClick(); }});
+    renderShop();
 </script>
 </body>
 </html>
