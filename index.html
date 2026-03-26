@@ -3,286 +3,353 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SKITMC | INFINITY CLICKER</title>
+    <title>SKITMC | OVERDRIVE</title>
     <style>
         :root {
-            --bg: #0a0f1e;
-            --panel: #161b2d;
-            --accent: #f59e0b; 
-            --click-neon: #06b6d4;
-            --text: #f8fafc;
-            --success: #22c55e;
-            --border: #2d3748;
+            --bg: #050505;
+            --panel: #111111;
+            --yellow: #ffcc00;
+            --orange: #ff6600;
+            --text: #eeeeee;
+            --border: #222222;
+            --glow: rgba(255, 204, 0, 0.2);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
         body { background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
+        /* HUD Header */
         header {
             background: var(--panel);
-            padding: 15px 30px;
-            border-bottom: 2px solid var(--accent);
+            padding: 20px 40px;
+            border-bottom: 3px solid var(--orange);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 100;
+            box-shadow: 0 5px 20px #000;
         }
 
-        .level-box { flex: 1; max-width: 600px; margin: 0 40px; }
-        .progress-container { height: 12px; background: #020617; border-radius: 10px; margin-top: 5px; border: 1px solid var(--border); overflow: hidden; }
-        #progress-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #f59e0b, #fbbf24); transition: width 0.3s; }
+        .battery-container { flex: 1; max-width: 500px; margin: 0 50px; }
+        .battery-shell { 
+            height: 25px; 
+            border: 2px solid var(--yellow); 
+            padding: 2px; 
+            position: relative;
+            background: #000;
+        }
+        .battery-segments {
+            display: flex;
+            height: 100%;
+            width: 100%;
+            gap: 2px;
+        }
+        .segment { flex: 1; background: #222; transition: background 0.2s; }
+        .segment.active { background: var(--yellow); box-shadow: 0 0 10px var(--yellow); }
 
         main { display: flex; flex: 1; overflow: hidden; }
 
+        /* Core Section */
         .click-zone {
-            flex: 1.2;
+            flex: 1.3;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: radial-gradient(circle at center, #1e293b 0%, #0a0f1e 100%);
-            border-right: 1px solid var(--border);
+            border-right: 2px solid var(--border);
             position: relative;
         }
 
-        #score-display { font-size: 5rem; font-weight: 900; color: #fff; text-shadow: 0 0 20px rgba(6, 182, 212, 0.3); }
-        #pps-display { font-size: 1.2rem; color: var(--click-neon); margin-bottom: 30px; font-weight: 600; min-height: 1.5em; }
+        #score-display { font-size: 5.5rem; font-weight: 900; color: var(--yellow); text-shadow: 0 0 30px var(--glow); margin-bottom: 5px; }
+        #pps-display { font-size: 1.1rem; color: var(--orange); letter-spacing: 2px; margin-bottom: 40px; font-weight: bold; }
 
-        #main-btn {
-            width: 280px;
-            height: 280px;
-            border-radius: 50%;
-            border: 10px solid var(--click-neon);
-            background: var(--panel);
+        .core-container {
+            width: 320px;
+            height: 320px;
+            position: relative;
             cursor: pointer;
-            font-size: 7rem;
             transition: transform 0.05s;
-            box-shadow: 0 0 40px rgba(6, 182, 212, 0.2);
-            user-select: none;
-            display: flex; align-items: center; justify-content: center;
-            position: relative;
         }
-        #main-btn:active { transform: scale(0.92); }
+        .core-container:active { transform: scale(0.94); }
+        .core-img { width: 100%; height: 100%; object-fit: contain; }
 
-        .floating-text {
-            position: absolute;
-            color: var(--click-neon);
-            font-weight: bold;
-            pointer-events: none;
-            animation: floatUp 0.8s ease-out forwards;
-            z-index: 1000;
-        }
-
-        @keyframes floatUp {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-100px); opacity: 0; }
-        }
-
+        /* Shop Section */
         .shop-zone { flex: 1; background: var(--panel); display: flex; flex-direction: column; }
-        .shop-tabs { padding: 20px; border-bottom: 1px solid var(--border); font-weight: bold; letter-spacing: 1px; color: var(--accent); }
+        .shop-nav { padding: 15px 25px; background: #000; font-size: 0.9rem; font-weight: bold; color: var(--yellow); border-bottom: 1px solid var(--border); }
         
-        #upgrade-list { flex: 1; overflow-y: scroll; padding: 15px; }
-        #upgrade-list::-webkit-scrollbar { width: 8px; }
-        #upgrade-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        #upgrade-list { flex: 1; overflow-y: scroll; padding: 20px; scrollbar-width: thin; }
+        #upgrade-list::-webkit-scrollbar { width: 6px; }
+        #upgrade-list::-webkit-scrollbar-thumb { background: var(--orange); }
 
         .item {
-            background: #1e293b;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 10px;
+            background: #0a0a0a;
+            padding: 18px;
+            border-left: 4px solid var(--border);
+            margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
             transition: 0.2s;
-            border: 1px solid transparent;
         }
-        .item:hover:not(.locked) { background: #2d3748; border-color: var(--click-neon); transform: translateX(-3px); }
-        .item.locked { opacity: 0.3; cursor: not-allowed; filter: grayscale(1); }
-        .item.special { border: 2px solid var(--accent); }
+        .item:hover:not(.locked) { background: #151515; border-left-color: var(--yellow); transform: translateX(5px); }
+        .item.locked { opacity: 0.2; cursor: not-allowed; }
+        .item.manual-type { border-left-color: var(--orange); }
 
-        .item-text h4 { font-size: 1rem; color: #fff; }
-        .item-text p { font-size: 0.75rem; color: #94a3b8; }
-        .item-cost { font-weight: 800; color: var(--success); font-size: 1.1rem; }
+        .item-info h4 { font-size: 1rem; color: #fff; text-transform: uppercase; }
+        .item-info p { font-size: 0.75rem; color: #666; margin-top: 3px; }
+        .item-price { text-align: right; }
+        .price-val { display: block; font-weight: 900; color: var(--yellow); font-size: 1.1rem; }
+        .owned-count { font-size: 0.7rem; color: #444; }
 
-        footer { background: #020617; padding: 10px 25px; display: flex; justify-content: space-between; font-size: 0.8rem; color: #64748b; }
-        .rebirth-btn { background: var(--accent); color: #000; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; display: none; }
+        /* Floating Text */
+        .float {
+            position: absolute;
+            pointer-events: none;
+            font-weight: 900;
+            animation: rise 0.7s ease-out forwards;
+            z-index: 999;
+            text-shadow: 2px 2px #000;
+        }
+        @keyframes rise { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-130px); opacity: 0; } }
+
+        /* Rebirth Overlay */
+        #prestige-panel {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--orange);
+            color: #000;
+            padding: 15px 30px;
+            font-weight: 900;
+            border-radius: 4px;
+            cursor: pointer;
+            display: none;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+
+        footer { background: #000; padding: 10px 40px; display: flex; justify-content: space-between; font-size: 0.75rem; color: #444; border-top: 1px solid var(--border); }
     </style>
 </head>
 <body>
 
 <header>
-    <div><strong>SKITMC</strong> <small>v4.1</small></div>
-    <div class="level-box">
-        <div style="display: flex; justify-content: space-between; font-size: 0.8rem;">
-            <span id="lvl-txt">LEVEL 1</span>
-            <span id="xp-txt">0 / 100 XP</span>
+    <div><strong style="color:var(--yellow)">SKITMC</strong> <small style="color:var(--orange)">OVERDRIVE</small></div>
+    <div class="battery-container">
+        <div style="display: flex; justify-content: space-between; font-size: 0.7rem; margin-bottom: 4px;">
+            <span id="lvl-display">UNIT LEVEL: 1</span>
+            <span id="xp-display">0 / 100 WATTS</span>
         </div>
-        <div class="progress-container"><div id="progress-fill"></div></div>
+        <div class="battery-shell">
+            <div class="battery-segments" id="battery-segments">
+                </div>
+        </div>
     </div>
-    <button class="rebirth-btn" id="rebirth-btn" onclick="prestige()">REBIRTH</button>
+    <div style="text-align: right">
+        <div style="font-size: 0.7rem; color: #666">REBIRTH MULTIPLIER</div>
+        <div id="stat-mult" style="color:var(--yellow); font-weight: 900;">1.0x</div>
+    </div>
 </header>
 
 <main>
-    <section class="click-zone" id="click-zone">
+    <section class="click-zone" id="zone">
         <div id="score-display">0</div>
-        <div id="pps-display">0.0 TOTAL INCOME / SEC</div>
-        <button id="main-btn">💎</button>
+        <div id="pps-display">0.0 WATTS / SEC</div>
+        <div class="core-container" id="core">
+            <img src="assets/clicker.png" alt="Core" class="core-img">
+        </div>
+        <div id="prestige-panel" onclick="rebirth()">SYSTEM OVERCLOCK (REBIRTH)</div>
     </section>
 
     <section class="shop-zone">
-        <div class="shop-tabs">ULTIMATE SHOP</div>
+        <div class="shop-nav">GRID SUBSYSTEMS</div>
         <div id="upgrade-list"></div>
     </section>
 </main>
 
 <footer>
-    <span>PER CLICK: <span id="stat-ppc">1</span></span>
-    <span>MULTIPLIER: <span id="stat-mult">1x</span></span>
-    <button onclick="localStorage.clear(); location.reload();" style="background:none; border:none; color:#444; cursor:pointer;">Reset</button>
+    <span>SYSTEM STATUS: <span style="color:var(--yellow)">STABLE</span></span>
+    <span>MANUAL OUTPUT: <span id="stat-ppc">1</span> WATTS/CLICK</span>
+    <span onclick="if(confirm('Reset?')) {localStorage.clear(); location.reload();}" style="cursor:pointer">WIPE DATA</span>
 </footer>
 
 <script>
-    let score = 0;
-    let totalEarned = 0;
-    let prestigeLevel = 0;
+    let watts = 0;
+    let totalWatts = 0;
     let level = 1;
+    let rebirths = 0;
 
-    const catalog = [
-        { name: "Personal Hand", type: 'click', cost: 15, power: 1, rate: 3.0, desc: "Hand-crafted clicking power.", special: true },
-        { name: "Task Script", type: 'auto', cost: 50, power: 1, rate: 1.15, desc: "A basic background process." },
-        { name: "Gaming Mouse", type: 'click', cost: 600, power: 12, rate: 3.5, desc: "Razer-fast response times.", special: true },
-        { name: "Skit Server", type: 'auto', cost: 1200, power: 10, rate: 1.15, desc: "Dedicated hosting power." },
-        { name: "Data Farm", type: 'auto', cost: 5000, power: 55, rate: 1.16, desc: "A room full of machines." },
-        { name: "Neural Bot", type: 'auto', cost: 25000, power: 240, rate: 1.17, desc: "AI that learns to click." },
-        { name: "Satellite Link", type: 'auto', cost: 150000, power: 1100, rate: 1.18, desc: "Orbital point generation." },
-        { name: "Quantum Rig", type: 'auto', cost: 1000000, power: 6000, rate: 1.19, desc: "Computing across dimensions." },
-        { name: "Reality Core", type: 'auto', cost: 10000000, power: 45000, rate: 1.20, desc: "Bending physics for points." }
+    const upgrades = [
+        { name: "Manual Crank", type: "click", cost: 15, power: 1, rate: 2.8, desc: "Simple physical generation." },
+        { name: "Lemon Battery", type: "auto", cost: 50, power: 1, rate: 1.15, desc: "A sour start." },
+        { name: "Static Carpet", type: "auto", cost: 250, power: 4, rate: 1.15, desc: "Passive friction." },
+        { name: "Copper Coil", type: "click", cost: 800, power: 12, rate: 3.2, desc: "Improves touch conductivity." },
+        { name: "Small Solar", type: "auto", cost: 1200, power: 15, rate: 1.15, desc: "Harness the light." },
+        { name: "Wind Blade", type: "auto", cost: 5000, power: 50, rate: 1.16, desc: "Turbine infrastructure." },
+        { name: "Hydro Turbine", type: "auto", cost: 20000, power: 180, rate: 1.16, desc: "River-based flow." },
+        { name: "Coal Plant", type: "auto", cost: 85000, power: 650, rate: 1.17, desc: "Industrial output." },
+        { name: "Nuclear Fission", type: "auto", cost: 400000, power: 2800, rate: 1.17, desc: "Splitting atoms." },
+        { name: "Fusion Core", type: "auto", cost: 1500000, power: 9000, rate: 1.18, desc: "The power of stars." },
+        { name: "Antimatter Coil", type: "auto", cost: 10000000, power: 45000, rate: 1.19, desc: "Dangerous efficiency." },
+        { name: "Dyson Swarm", type: "auto", cost: 100000000, power: 250000, rate: 1.20, desc: "Total solar harvest." },
+        { name: "Void Siphon", type: "auto", cost: 1000000000, power: 1200000, rate: 1.22, desc: "Extraction from nothing." }
     ];
 
-    let owned = new Array(catalog.length).fill(0);
+    let owned = new Array(upgrades.length).fill(0);
+
+    function format(num) {
+        if (num < 1000) return Math.floor(num);
+        const suffixes = ["K", "M", "B", "T", "Qa", "Qi", "Sx"];
+        const suffixNum = Math.floor(("" + Math.floor(num)).length / 3);
+        let shortValue = parseFloat((suffixNum != 0 ? (num / Math.pow(1000, suffixNum)) : num).toPrecision(3));
+        if (shortValue % 1 != 0) shortValue = shortValue.toFixed(1);
+        return shortValue + suffixes[suffixNum - 1];
+    }
 
     function init() {
         load();
-        setInterval(gameTick, 100); 
+        createBattery();
+        setInterval(tick, 100);
         setInterval(save, 5000);
+        
+        window.addEventListener('keydown', (e) => { if(e.code === "Space") { e.preventDefault(); handleInteraction(window.innerWidth/3, window.innerHeight/2); }});
+        document.getElementById('core').addEventListener('mousedown', (e) => handleInteraction(e.clientX, e.clientY));
+        
         renderShop();
     }
 
-    function gameTick() {
-        let mult = (1 + (level - 1) * 0.05) * Math.pow(2, prestigeLevel);
-        let ppsBase = 0;
-        catalog.forEach((u, i) => { if(u.type === 'auto') ppsBase += (u.power * owned[i]); });
+    function handleInteraction(x, y) {
+        let mult = (1 + (level - 1) * 0.1) * Math.pow(3, rebirths);
+        let ppc = 1;
+        upgrades.forEach((u, i) => { if(u.type === 'click') ppc += (u.power * owned[i]); });
         
-        let gain = (ppsBase * mult) / 10;
-        score += gain;
-        totalEarned += gain;
+        let gain = ppc * mult;
+        watts += gain;
+        totalWatts += gain;
+        
+        pop(x, y, gain);
+        updateUI(mult);
+    }
+
+    function pop(x, y, val) {
+        const words = ["ZAP!", "SURGE!", "VOLTS!", "SPARK!", "CORE!", "MAX!"];
+        const d = document.createElement('div');
+        d.className = 'float';
+        d.style.left = x + 'px';
+        d.style.top = y + 'px';
+        d.style.color = Math.random() > 0.5 ? 'var(--yellow)' : 'var(--orange)';
+        d.innerHTML = `+${format(val)}<br><small>${words[Math.floor(Math.random()*words.length)]}</small>`;
+        document.body.appendChild(d);
+        setTimeout(() => d.remove(), 700);
+    }
+
+    function tick() {
+        let mult = (1 + (level - 1) * 0.1) * Math.pow(3, rebirths);
+        let pps = 0;
+        upgrades.forEach((u, i) => { if(u.type === "auto") pps += (u.power * owned[i]); });
+        
+        let gain = (pps * mult) / 10;
+        watts += gain;
+        totalWatts += gain;
         
         checkLevel();
-        updateUI(mult, ppsBase);
-    }
-
-    document.getElementById('main-btn').addEventListener('click', (e) => {
-        let mult = (1 + (level - 1) * 0.05) * Math.pow(2, prestigeLevel);
-        let ppcBase = 1;
-        catalog.forEach((u, i) => { if(u.type === 'click') ppcBase += (u.power * owned[i]); });
-        
-        let clickVal = ppcBase * mult;
-        score += clickVal;
-        totalEarned += clickVal;
-        
-        spawnFloatingText(e.clientX, e.clientY, clickVal);
-        updateUI(mult);
-        renderShop();
-    });
-
-    function spawnFloatingText(x, y, val) {
-        const text = document.createElement('div');
-        text.className = 'floating-text';
-        text.innerText = '+' + Math.floor(val).toLocaleString();
-        text.style.left = x + 'px';
-        text.style.top = y + 'px';
-        document.body.appendChild(text);
-        setTimeout(() => text.remove(), 800);
+        updateUI(mult, pps);
     }
 
     function buy(i) {
-        let u = catalog[i];
-        let cost = Math.floor(u.cost * Math.pow(u.rate, owned[i]));
-        if (score >= cost) {
-            score -= cost;
+        let cost = Math.floor(upgrades[i].cost * Math.pow(upgrades[i].rate, owned[i]));
+        if (watts >= cost) {
+            watts -= cost;
             owned[i]++;
             renderShop();
-            updateUI();
         }
     }
 
     function checkLevel() {
-        let next = 100 * Math.pow(level, 2.3);
-        if (totalEarned >= next) level++;
-        document.getElementById('rebirth-btn').style.display = (level >= 12) ? 'block' : 'none';
+        let next = 100 * Math.pow(level, 2.4);
+        if (totalWatts >= next) level++;
+        document.getElementById('prestige-panel').style.display = (level >= 15) ? 'block' : 'none';
     }
 
-    function updateUI(mult = 1, pps = 0) {
-        document.getElementById('score-display').innerText = Math.floor(score).toLocaleString();
-        document.getElementById('pps-display').innerText = (pps * mult).toLocaleString() + " TOTAL INCOME / SEC";
+    function createBattery() {
+        const container = document.getElementById('battery-segments');
+        container.innerHTML = '';
+        for(let i=0; i<20; i++) {
+            let s = document.createElement('div');
+            s.className = 'segment';
+            container.appendChild(s);
+        }
+    }
+
+    function updateUI(mult, pps = 0) {
+        document.getElementById('score-display').innerText = format(watts);
+        document.getElementById('pps-display').innerText = format(pps * mult) + " WATTS / SEC";
+        document.getElementById('stat-mult').innerText = mult.toFixed(1) + "x";
         
         let ppcBase = 1;
-        catalog.forEach((u, i) => { if(u.type === 'click') ppcBase += (u.power * owned[i]); });
-        document.getElementById('stat-ppc').innerText = (ppcBase * mult).toLocaleString();
-        document.getElementById('stat-mult').innerText = mult.toFixed(1) + "x";
+        upgrades.forEach((u, i) => { if(u.type === 'click') ppcBase += (u.power * owned[i]); });
+        document.getElementById('stat-ppc').innerText = format(ppcBase * mult);
 
-        let currentLvlBase = 100 * Math.pow(level - 1, 2.3);
-        let nextLvlReq = 100 * Math.pow(level, 2.3);
-        let progress = ((totalEarned - currentLvlBase) / (nextLvlReq - currentLvlBase)) * 100;
-        document.getElementById('lvl-txt').innerText = "LEVEL " + level;
-        document.getElementById('xp-txt').innerText = Math.floor(totalEarned).toLocaleString() + " / " + Math.floor(nextLvlReq).toLocaleString() + " XP";
-        document.getElementById('progress-fill').style.width = progress + "%";
+        // Battery Logic
+        let currentLvlBase = 100 * Math.pow(level - 1, 2.4);
+        let nextLvlReq = 100 * Math.pow(level, 2.4);
+        let progress = (totalWatts - currentLvlBase) / (nextLvlReq - currentLvlBase);
+        
+        document.getElementById('lvl-display').innerText = `UNIT LEVEL: ${level}`;
+        document.getElementById('xp-display').innerText = `${format(totalWatts)} / ${format(nextLvlReq)} WATTS`;
+        
+        const segments = document.querySelectorAll('.segment');
+        segments.forEach((s, i) => {
+            if (i / segments.length < progress) s.classList.add('active');
+            else s.classList.remove('active');
+        });
     }
 
     function renderShop() {
         const container = document.getElementById('upgrade-list');
         container.innerHTML = '';
-        catalog.forEach((u, i) => {
+        upgrades.forEach((u, i) => {
             let cost = Math.floor(u.cost * Math.pow(u.rate, owned[i]));
-            let canAfford = score >= cost;
+            let canAfford = watts >= cost;
             let item = document.createElement('div');
-            item.className = `item ${!canAfford ? 'locked' : ''} ${u.special ? 'special' : ''}`;
+            item.className = `item ${!canAfford ? 'locked' : ''} ${u.type === 'click' ? 'manual-type' : ''}`;
             item.onclick = () => buy(i);
             item.innerHTML = `
-                <div class="item-text">
-                    <h4>${u.name} [Lv.${owned[i]}]</h4>
+                <div class="item-info">
+                    <h4>${u.name}</h4>
                     <p>${u.desc}</p>
                 </div>
-                <div class="item-cost">${cost.toLocaleString()}</div>
+                <div class="item-price">
+                    <span class="price-val">${format(cost)}</span>
+                    <span class="owned-count">LVL ${owned[i]}</span>
+                </div>
             `;
             container.appendChild(item);
         });
     }
 
-    function prestige() {
-        if (confirm("REBIRTH? Everything resets but you get x2 Multiplier!")) {
-            prestigeLevel++;
-            score = 0;
-            owned = new Array(catalog.length).fill(0);
+    function rebirth() {
+        if(confirm("SYSTEM OVERCLOCK? Grid will reset, but global power increases by 300%!")) {
+            rebirths++;
+            watts = 0;
+            totalWatts = 0;
+            level = 1;
+            owned.fill(0); // FIXED: Actually resets progress now!
             save();
             location.reload();
         }
     }
 
-    function save() {
-        localStorage.setItem('skitmc_final', JSON.stringify({score, totalEarned, owned, level, prestigeLevel}));
-    }
-
+    function save() { localStorage.setItem('skit_overdrive_v1', JSON.stringify({watts, totalWatts, level, rebirths, owned})); }
     function load() {
-        let raw = localStorage.getItem('skitmc_final');
-        if (raw) {
-            let d = JSON.parse(raw);
-            score = d.score || 0;
-            totalEarned = d.totalEarned || 0;
-            owned = d.owned || owned;
-            level = d.level || 1;
-            prestigeLevel = d.prestigeLevel || 0;
+        let data = JSON.parse(localStorage.getItem('skit_overdrive_v1'));
+        if(data) {
+            watts = data.watts || 0;
+            totalWatts = data.totalWatts || 0;
+            level = data.level || 1;
+            rebirths = data.rebirths || 0;
+            owned = data.owned || owned;
         }
     }
 
