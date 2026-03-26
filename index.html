@@ -24,11 +24,10 @@
 
         canvas { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 100; }
 
-        /* Slim Header */
         header {
             background: var(--panel); padding: 0 40px; border-bottom: 1px solid #222;
             display: flex; justify-content: space-between; align-items: center;
-            z-index: 10; height: 50px;
+            z-index: 10; height: 65px;
         }
 
         .main-title {
@@ -38,21 +37,24 @@
             letter-spacing: 6px;
         }
 
-        .header-stats { display: flex; align-items: center; gap: 20px; }
-
+        .header-stats { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        
+        .battery-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
         .level-badge {
-            background: var(--orange); color: #000; padding: 2px 10px;
-            font-weight: 900; font-size: 0.8rem; border-radius: 3px;
+            background: var(--orange); color: #000; padding: 2px 8px;
+            font-weight: 900; font-size: 0.8rem; border-radius: 2px;
         }
 
         .battery-container {
-            width: 250px; height: 10px; border: 1px solid #333;
+            width: 280px; height: 12px; border: 1px solid #333;
             background: #000; position: relative; overflow: hidden;
         }
         #battery-fill {
             height: 100%; width: 0%; background: var(--yellow);
             box-shadow: 0 0 10px var(--orange); transition: width 0.4s ease;
         }
+        
+        .rebirth-tracker { font-size: 0.6rem; color: #777; letter-spacing: 1px; font-family: 'JetBrains Mono'; }
 
         #settings-toggle { font-size: 1.2rem; cursor: pointer; color: var(--yellow); }
 
@@ -73,28 +75,58 @@
         #score-text { 
             font-size: 5.5rem; font-weight: 900; color: #fff;
             text-shadow: 0 0 20px var(--orange); font-family: 'JetBrains Mono';
+            margin-bottom: -5px;
         }
         #pps-text { color: var(--yellow); font-size: 1rem; margin-bottom: 20px; opacity: 0.7; }
 
         .core-wrapper {
-            position: relative; width: 300px; height: 300px;
-            cursor: pointer; transition: transform 0.05s;
+            position: relative; width: 280px; height: 280px;
+            cursor: pointer; transition: transform 0.05s; margin-bottom: 30px;
         }
         .core-wrapper:active { transform: scale(0.94); }
         .core-wrapper img { width: 100%; height: 100%; filter: drop-shadow(0 0 20px var(--orange)); }
 
+        #rebirth-btn {
+            padding: 12px 30px; font-family: 'Orbitron'; font-weight: 900; font-size: 0.9rem;
+            letter-spacing: 2px; transition: 0.3s; border: 1px solid; text-transform: uppercase;
+        }
+        #rebirth-btn.locked { background: transparent; color: #444; border-color: #333; cursor: not-allowed; }
+        #rebirth-btn.ready {
+            background: rgba(255, 102, 0, 0.1); color: var(--yellow); border-color: var(--orange);
+            cursor: pointer; box-shadow: 0 0 15px rgba(255, 102, 0, 0.3); animation: pulse 2s infinite;
+        }
+        #rebirth-btn.ready:hover { background: var(--orange); color: #000; }
+        @keyframes pulse { 0% { box-shadow: 0 0 15px rgba(255,102,0,0.3); } 50% { box-shadow: 0 0 25px rgba(255,204,0,0.6); } 100% { box-shadow: 0 0 15px rgba(255,102,0,0.3); } }
+
         .shop-section { flex: 1; background: #08080a; display: flex; flex-direction: column; }
+        
+        /* New Shop Header UI */
+        .shop-header {
+            padding: 15px 20px; background: #000; border-bottom: 1px solid var(--orange);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .shop-title { color: var(--orange); font-weight: 900; font-size: 0.85rem; letter-spacing: 2px; }
+        .buy-toggles { display: flex; gap: 5px; }
+        .buy-btn {
+            background: #111; color: #666; border: 1px solid #333; padding: 4px 10px;
+            font-family: 'JetBrains Mono'; font-weight: 900; cursor: pointer; transition: 0.2s;
+        }
+        .buy-btn.active { background: var(--orange); color: #000; border-color: var(--yellow); }
+        .buy-btn:hover:not(.active) { background: #222; color: #fff; }
+
         #upgrade-list { flex: 1; overflow-y: auto; padding: 15px; }
 
         .item {
             background: #0d0d12; border: 1px solid #1a1a1a; padding: 14px;
             margin-bottom: 8px; display: flex; justify-content: space-between;
-            align-items: center; cursor: pointer;
+            align-items: center; cursor: pointer; transition: 0.2s;
         }
-        .item:hover:not(.locked) { border-color: var(--yellow); background: #14141c; }
+        .item:hover:not(.locked) { border-color: var(--yellow); background: #14141c; transform: translateX(-2px); }
         .item.locked { opacity: 0.15; cursor: not-allowed; }
         .item-info h4 { font-size: 0.85rem; color: var(--yellow); }
         .item-info p { font-size: 0.65rem; color: #555; }
+        .item-cost-display { text-align: right; }
+        .item-cost-display span { display: block; font-size: 0.6rem; color: #666; margin-top: 2px; }
 
         .pop {
             position: absolute; pointer-events: none; color: var(--yellow);
@@ -130,10 +162,13 @@
 <header>
     <div class="main-title">OVERDRIVE</div>
     <div class="header-stats">
-        <div class="level-badge">LVL <span id="level-num">1</span></div>
-        <div class="battery-container">
-            <div id="battery-fill"></div>
+        <div class="battery-row">
+            <div class="level-badge">LVL <span id="level-num">1</span></div>
+            <div class="battery-container">
+                <div id="battery-fill"></div>
+            </div>
         </div>
+        <div class="rebirth-tracker">LEVELS REQUIRED TO REBIRTH: <span style="color: var(--orange)">100</span></div>
     </div>
     <div id="settings-toggle" onclick="toggleSettings()">⚙️</div>
 </header>
@@ -142,26 +177,39 @@
     <section class="reactor-section" id="shake-target">
         <div id="score-text">0</div>
         <div id="pps-text">0.0 WATTS / SEC</div>
+        
         <div class="core-wrapper" id="core-btn">
             <img src="assets/clicker.png" id="core-img">
         </div>
+        
+        <div id="rebirth-btn" class="locked" onclick="prestige()">SYSTEM REBIRTH [LOCKED]</div>
     </section>
 
     <section class="shop-section">
+        <div class="shop-header">
+            <div class="shop-title">SUBSYSTEMS</div>
+            <div class="buy-toggles">
+                <button class="buy-btn active" id="btn-1x" onclick="setBuyAmount(1)">1x</button>
+                <button class="buy-btn" id="btn-5x" onclick="setBuyAmount(5)">5x</button>
+                <button class="buy-btn" id="btn-10x" onclick="setBuyAmount(10)">10x</button>
+            </div>
+        </div>
         <div id="upgrade-list"></div>
     </section>
 </main>
 
 <footer>
-    <div>AUTO: <span id="stat-pps">0</span> | MANUAL: <span id="stat-ppc">1</span></div>
+    <div>MULTIPLIER: <span id="stat-mult" style="color:var(--orange)">1x</span> | AUTO: <span id="stat-pps">0</span> | MANUAL: <span id="stat-ppc">1</span></div>
     <div style="display:flex; align-items:center; gap:15px;">
-        <span>IF YOU WANT TO MORE LEARN ABOUT THE DEVELOPER CLICK!</span>
+        <span>LEARN MORE ABOUT THE DEVELOPER:</span>
         <a href="https://skitmc.github.io/" target="_blank" class="dev-portal">DEVELOPER</a>
     </div>
 </footer>
 
 <script>
     let watts = 0, totalEver = 0, level = 1, rebirths = 0;
+    let buyAmount = 1; // Tracks how many items we are buying at once
+    
     const canvas = document.getElementById('lightning');
     const ctx = canvas.getContext('2d');
     
@@ -186,7 +234,7 @@
 
     function format(n) {
         if (n < 1000) return Math.floor(n);
-        let s = ["K", "M", "B", "T", "Qa", "Qi"];
+        let s = ["K", "M", "B", "T", "Qa", "Qi", "Sx"];
         let e = Math.floor(Math.log10(n) / 3);
         return (n / Math.pow(1000, e)).toFixed(1) + s[e-1];
     }
@@ -201,8 +249,25 @@
         else bgMusic.pause();
     }
 
+    // Handles switching between 1x, 5x, and 10x
+    function setBuyAmount(amt) {
+        buyAmount = amt;
+        document.querySelectorAll('.buy-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('btn-' + amt + 'x').classList.add('active');
+        renderShop();
+        updateUI();
+    }
+
+    // Uses Geometric Series math to calculate the cost of buying multiple items
+    function getCost(base, rate, currentOwned, amountToBuy) {
+        if (amountToBuy === 1) return Math.floor(base * Math.pow(rate, currentOwned));
+        return Math.floor(base * Math.pow(rate, currentOwned) * (Math.pow(rate, amountToBuy) - 1) / (rate - 1));
+    }
+
+    function getMultiplier() { return 1 + rebirths; }
+
     function doClick(e) {
-        let mult = (1 + (level - 1) * 0.1) * Math.pow(5, rebirths);
+        let mult = getMultiplier();
         let basePPC = 1;
         catalog.forEach((u, i) => { if(u.type === "click") basePPC += (u.power * owned[i]); });
         
@@ -210,19 +275,16 @@
         watts += val;
         totalEver += val;
         
-        // Handle Visuals
         if(document.getElementById('anim-toggle').checked) {
             sparkEffect();
             document.getElementById('shake-target').classList.add('shake');
             setTimeout(() => document.getElementById('shake-target').classList.remove('shake'), 100);
         }
 
-        // Animation Position
         let x, y;
         if(e) {
             x = e.clientX; y = e.clientY;
         } else {
-            // Spacebar/Auto-center logic
             const rect = document.getElementById('core-img').getBoundingClientRect();
             x = rect.left + rect.width / 2;
             y = rect.top + rect.height / 2;
@@ -254,7 +316,7 @@
     }
 
     function tick() {
-        let mult = (1 + (level - 1) * 0.1) * Math.pow(5, rebirths);
+        let mult = getMultiplier();
         let basePPS = 0;
         catalog.forEach((u, i) => { if(u.type === "auto") basePPS += (u.power * owned[i]); });
         
@@ -262,41 +324,52 @@
         watts += gain;
         totalEver += gain;
         
-        let nextLvl = 100 * Math.pow(level, 2.5);
+        let nextLvl = 250 * Math.pow(level, 3);
         if (totalEver >= nextLvl) level++;
         
         updateUI(mult, basePPS);
     }
 
     function updateUI(mult, pps = 0) {
-        if(!mult) mult = (1 + (level - 1) * 0.1) * Math.pow(5, rebirths);
+        if(!mult) mult = getMultiplier();
         document.getElementById('score-text').innerText = format(watts);
         document.getElementById('pps-text').innerText = format(pps * mult) + " WATTS / SEC";
         document.getElementById('stat-pps').innerText = format(pps * mult);
+        document.getElementById('stat-mult').innerText = mult + "x";
         document.getElementById('level-num').innerText = level;
         
         let ppc = 1;
         catalog.forEach((u, i) => { if(u.type === "click") ppc += (u.power * owned[i]); });
         document.getElementById('stat-ppc').innerText = format(ppc * mult);
 
-        let curReq = 100 * Math.pow(level-1, 2.5);
-        let nxtReq = 100 * Math.pow(level, 2.5);
+        let curReq = 250 * Math.pow(level-1, 3);
+        let nxtReq = 250 * Math.pow(level, 3);
         let progress = ((totalEver - curReq) / (nxtReq - curReq)) * 100;
         document.getElementById('battery-fill').style.width = Math.min(100, progress) + "%";
         
+        const rebirthBtn = document.getElementById('rebirth-btn');
+        if(level >= 100) {
+            rebirthBtn.className = "ready";
+            rebirthBtn.innerText = "INITIATE REBIRTH";
+        } else {
+            rebirthBtn.className = "locked";
+            rebirthBtn.innerText = "SYSTEM REBIRTH [LOCKED]";
+        }
+        
+        // Update Shop visuals based on new Multi-buy costs
         const uiItems = document.querySelectorAll('.item');
         catalog.forEach((u, i) => {
-            let cost = Math.floor(u.cost * Math.pow(u.rate, owned[i]));
+            let cost = getCost(u.cost, u.rate, owned[i], buyAmount);
             if(watts >= cost) uiItems[i].classList.remove('locked');
             else uiItems[i].classList.add('locked');
         });
     }
 
     function buy(i) {
-        let cost = Math.floor(catalog[i].cost * Math.pow(catalog[i].rate, owned[i]));
+        let cost = getCost(catalog[i].cost, catalog[i].rate, owned[i], buyAmount);
         if(watts >= cost) {
             watts -= cost;
-            owned[i]++;
+            owned[i] += buyAmount; // Give the player X amount of items
             if(document.getElementById('sfx-toggle').checked) buySfx.play().catch(()=>{});
             renderShop();
             updateUI();
@@ -307,24 +380,40 @@
         const container = document.getElementById('upgrade-list');
         container.innerHTML = '';
         catalog.forEach((u, i) => {
-            let cost = Math.floor(u.cost * Math.pow(u.rate, owned[i]));
+            let cost = getCost(u.cost, u.rate, owned[i], buyAmount);
             let el = document.createElement('div');
             el.className = `item ${watts < cost ? 'locked' : ''}`;
             el.onclick = () => buy(i);
+            
+            // Added a small "Buy X" indicator under the price to make it super clear
             el.innerHTML = `
                 <div class="item-info">
                     <h4>${u.name} [Lv.${owned[i]}]</h4>
                     <p>${u.desc}</p>
                 </div>
-                <div style="color:var(--orange); font-weight:900;">${format(cost)}</div>
+                <div class="item-cost-display">
+                    <div style="color:var(--orange); font-weight:900;">${format(cost)}</div>
+                    <span>BUY ${buyAmount}</span>
+                </div>
             `;
             container.appendChild(el);
         });
     }
 
-    function save() { localStorage.setItem('overdrive_save', JSON.stringify({watts, totalEver, level, rebirths, owned})); }
+    function prestige() {
+        if(level < 100) return; 
+        if(confirm(`WARNING: This will reset your power and subsystems.\nYour global multiplier will permanently increase to ${getMultiplier() + 1}x.\nProceed?`)) {
+            rebirths++;
+            watts = 0; totalEver = 0; level = 1;
+            owned.fill(0);
+            save();
+            location.reload();
+        }
+    }
+
+    function save() { localStorage.setItem('overdrive_save_hard', JSON.stringify({watts, totalEver, level, rebirths, owned})); }
     function load() {
-        let d = JSON.parse(localStorage.getItem('overdrive_save'));
+        let d = JSON.parse(localStorage.getItem('overdrive_save_hard'));
         if(d) {
             watts = d.watts || 0; totalEver = d.totalEver || 0;
             level = d.level || 1; rebirths = d.rebirths || 0;
