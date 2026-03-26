@@ -4,261 +4,303 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SKITMC | OVERDRIVE</title>
+    <link rel="icon" type="image/png" href="assets/clicker.png">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #050505;
-            --panel: #111111;
+            --bg: #050508;
+            --panel: rgba(12, 12, 18, 0.95);
             --yellow: #ffcc00;
             --orange: #ff6600;
-            --text: #eeeeee;
-            --border: #222222;
-            --glow: rgba(255, 204, 0, 0.2);
+            --border: #222;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
-        body { background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        
+        body { 
+            background: var(--bg); 
+            color: #fff; 
+            font-family: 'Orbitron', sans-serif;
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+        }
 
-        /* HUD Header */
+        /* Lightning Effect Layer */
+        #fx-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 100;
+        }
+
         header {
             background: var(--panel);
-            padding: 20px 40px;
-            border-bottom: 3px solid var(--orange);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 5px 20px #000;
+            padding: 15px 40px;
+            border-bottom: 2px solid var(--orange);
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 10;
         }
 
-        .battery-container { flex: 1; max-width: 500px; margin: 0 50px; }
-        .battery-shell { 
-            height: 25px; 
-            border: 2px solid var(--yellow); 
-            padding: 2px; 
-            position: relative;
-            background: #000;
+        .battery-container {
+            width: 300px; height: 22px; border: 2px solid #333;
+            background: #000; position: relative; overflow: hidden;
         }
-        .battery-segments {
-            display: flex;
-            height: 100%;
-            width: 100%;
-            gap: 2px;
-        }
-        .segment { flex: 1; background: #222; transition: background 0.2s; }
-        .segment.active { background: var(--yellow); box-shadow: 0 0 10px var(--yellow); }
-
-        main { display: flex; flex: 1; overflow: hidden; }
-
-        /* Core Section */
-        .click-zone {
-            flex: 1.3;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border-right: 2px solid var(--border);
-            position: relative;
+        #battery-fill {
+            height: 100%; width: 0%;
+            background: linear-gradient(90deg, var(--orange), var(--yellow));
+            box-shadow: 0 0 15px var(--yellow);
+            transition: width 0.3s ease;
         }
 
-        #score-display { font-size: 5.5rem; font-weight: 900; color: var(--yellow); text-shadow: 0 0 30px var(--glow); margin-bottom: 5px; }
-        #pps-display { font-size: 1.1rem; color: var(--orange); letter-spacing: 2px; margin-bottom: 40px; font-weight: bold; }
+        main { display: flex; flex: 1; overflow: hidden; z-index: 5; }
 
-        .core-container {
-            width: 320px;
-            height: 320px;
-            position: relative;
-            cursor: pointer;
-            transition: transform 0.05s;
+        /* Left Side: The Reactor */
+        .reactor-section {
+            flex: 1.4; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            position: relative; border-right: 1px solid var(--border);
         }
-        .core-container:active { transform: scale(0.94); }
-        .core-img { width: 100%; height: 100%; object-fit: contain; }
 
-        /* Shop Section */
-        .shop-zone { flex: 1; background: var(--panel); display: flex; flex-direction: column; }
-        .shop-nav { padding: 15px 25px; background: #000; font-size: 0.9rem; font-weight: bold; color: var(--yellow); border-bottom: 1px solid var(--border); }
-        
-        #upgrade-list { flex: 1; overflow-y: scroll; padding: 20px; scrollbar-width: thin; }
-        #upgrade-list::-webkit-scrollbar { width: 6px; }
-        #upgrade-list::-webkit-scrollbar-thumb { background: var(--orange); }
+        #score-text { 
+            font-size: 5rem; font-weight: 900; color: var(--yellow);
+            text-shadow: 0 0 25px rgba(255, 204, 0, 0.4);
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 5px;
+        }
+        #pps-text { color: var(--orange); font-size: 1.1rem; margin-bottom: 30px; letter-spacing: 2px; }
+
+        .core-box {
+            position: relative; width: 320px; height: 320px;
+            cursor: pointer; transition: transform 0.05s;
+        }
+        .core-box:active { transform: scale(0.92); }
+        .core-box img { width: 100%; height: 100%; filter: drop-shadow(0 0 20px var(--orange)); }
+
+        /* Right Side: Shop */
+        .shop-section { 
+            flex: 1; background: var(--panel); 
+            display: flex; flex-direction: column;
+            backdrop-filter: blur(10px);
+        }
+
+        .shop-header {
+            padding: 20px; background: #000;
+            border-bottom: 1px solid var(--orange);
+            color: var(--yellow); font-weight: 900;
+        }
+
+        #upgrade-container { flex: 1; overflow-y: auto; padding: 15px; }
 
         .item {
-            background: #0a0a0a;
-            padding: 18px;
-            border-left: 4px solid var(--border);
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            transition: 0.2s;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid #222;
+            padding: 16px; margin-bottom: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; transition: 0.2s;
         }
-        .item:hover:not(.locked) { background: #151515; border-left-color: var(--yellow); transform: translateX(5px); }
+        .item:hover:not(.locked) { 
+            background: rgba(255, 102, 0, 0.1); 
+            border-color: var(--yellow);
+            transform: translateX(5px);
+        }
         .item.locked { opacity: 0.2; cursor: not-allowed; }
-        .item.manual-type { border-left-color: var(--orange); }
 
-        .item-info h4 { font-size: 1rem; color: #fff; text-transform: uppercase; }
-        .item-info p { font-size: 0.75rem; color: #666; margin-top: 3px; }
-        .item-price { text-align: right; }
-        .price-val { display: block; font-weight: 900; color: var(--yellow); font-size: 1.1rem; }
-        .owned-count { font-size: 0.7rem; color: #444; }
+        .item-info h4 { color: var(--yellow); font-size: 0.85rem; text-transform: uppercase; }
+        .item-info p { color: #666; font-size: 0.7rem; font-family: sans-serif; margin-top: 2px; }
+        .item-cost { text-align: right; color: var(--orange); font-weight: 900; font-size: 1.1rem; }
 
-        /* Floating Text */
-        .float {
-            position: absolute;
-            pointer-events: none;
-            font-weight: 900;
-            animation: rise 0.7s ease-out forwards;
-            z-index: 999;
-            text-shadow: 2px 2px #000;
+        /* Pop-up Text */
+        .pop {
+            position: absolute; pointer-events: none;
+            color: #fff; font-weight: 900;
+            animation: floatUp 0.6s ease-out forwards;
+            z-index: 101;
         }
-        @keyframes rise { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-130px); opacity: 0; } }
-
-        /* Rebirth Overlay */
-        #prestige-panel {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--orange);
-            color: #000;
-            padding: 15px 30px;
-            font-weight: 900;
-            border-radius: 4px;
-            cursor: pointer;
-            display: none;
-            animation: pulse 1.5s infinite;
+        @keyframes floatUp { 
+            0% { opacity:1; transform:translateY(0) scale(1); } 
+            100% { opacity:0; transform:translateY(-120px) scale(1.5); } 
         }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
 
-        footer { background: #000; padding: 10px 40px; display: flex; justify-content: space-between; font-size: 0.75rem; color: #444; border-top: 1px solid var(--border); }
+        footer {
+            background: #000; padding: 12px 40px;
+            border-top: 1px solid var(--orange);
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 0.8rem;
+        }
+
+        .dev-portal {
+            background: var(--orange); color: #000;
+            padding: 8px 18px; text-decoration: none;
+            font-weight: 900; border-radius: 4px;
+            transition: 0.3s; box-shadow: 0 0 15px rgba(255, 102, 0, 0.4);
+            text-transform: uppercase;
+        }
+        .dev-portal:hover { background: var(--yellow); box-shadow: 0 0 25px var(--yellow); }
+
+        .shake { animation: shakeAnim 0.1s linear 2; }
+        @keyframes shakeAnim { 
+            0% { transform: translate(2px, 2px); } 
+            50% { transform: translate(-2px, -2px); } 
+            100% { transform: translate(0, 0); } 
+        }
     </style>
 </head>
 <body>
 
+<canvas id="fx-layer"></canvas>
+
 <header>
-    <div><strong style="color:var(--yellow)">SKITMC</strong> <small style="color:var(--orange)">OVERDRIVE</small></div>
+    <div>SKITMC <span style="color:var(--orange)">OVERDRIVE</span></div>
     <div class="battery-container">
-        <div style="display: flex; justify-content: space-between; font-size: 0.7rem; margin-bottom: 4px;">
-            <span id="lvl-display">UNIT LEVEL: 1</span>
-            <span id="xp-display">0 / 100 WATTS</span>
-        </div>
-        <div class="battery-shell">
-            <div class="battery-segments" id="battery-segments">
-                </div>
-        </div>
+        <div id="battery-fill"></div>
     </div>
-    <div style="text-align: right">
-        <div style="font-size: 0.7rem; color: #666">REBIRTH MULTIPLIER</div>
-        <div id="stat-mult" style="color:var(--yellow); font-weight: 900;">1.0x</div>
-    </div>
+    <div id="level-txt" style="color:var(--yellow)">UNIT LVL: 1</div>
 </header>
 
 <main>
-    <section class="click-zone" id="zone">
-        <div id="score-display">0</div>
-        <div id="pps-display">0.0 WATTS / SEC</div>
-        <div class="core-container" id="core">
-            <img src="assets/clicker.png" alt="Core" class="core-img">
+    <section class="reactor-section" id="shake-target">
+        <div id="pps-text">0.0 WATTS/S</div>
+        <div id="score-text">0</div>
+        <div class="core-box" id="core-btn">
+            <img src="assets/clicker.png" alt="CORE">
         </div>
-        <div id="prestige-panel" onclick="rebirth()">SYSTEM OVERCLOCK (REBIRTH)</div>
+        <div id="rebirth-btn" style="display:none; color:var(--orange); border:2px solid var(--orange); padding:10px; cursor:pointer; font-weight:900;" onclick="rebirth()">ACTIVATE REBIRTH</div>
     </section>
 
-    <section class="shop-zone">
-        <div class="shop-nav">GRID SUBSYSTEMS</div>
-        <div id="upgrade-list"></div>
+    <section class="shop-section">
+        <div class="shop-header">GRID SUBSYSTEMS</div>
+        <div id="upgrade-container"></div>
     </section>
 </main>
 
 <footer>
-    <span>SYSTEM STATUS: <span style="color:var(--yellow)">STABLE</span></span>
-    <span>MANUAL OUTPUT: <span id="stat-ppc">1</span> WATTS/CLICK</span>
-    <span onclick="if(confirm('Reset?')) {localStorage.clear(); location.reload();}" style="cursor:pointer">WIPE DATA</span>
+    <div style="color: #444">MANUAL: <span id="stat-ppc" style="color:#888">1</span> | AUTO: <span id="stat-pps" style="color:#888">0</span></div>
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <span style="color: #777">Learn more about the developer:</span>
+        <a href="https://skitmc.github.io/" target="_blank" class="dev-portal">DEVELOPER PORTAL</a>
+    </div>
 </footer>
 
 <script>
-    let watts = 0;
-    let totalWatts = 0;
-    let level = 1;
-    let rebirths = 0;
-
-    const upgrades = [
-        { name: "Manual Crank", type: "click", cost: 15, power: 1, rate: 2.8, desc: "Simple physical generation." },
-        { name: "Lemon Battery", type: "auto", cost: 50, power: 1, rate: 1.15, desc: "A sour start." },
-        { name: "Static Carpet", type: "auto", cost: 250, power: 4, rate: 1.15, desc: "Passive friction." },
-        { name: "Copper Coil", type: "click", cost: 800, power: 12, rate: 3.2, desc: "Improves touch conductivity." },
-        { name: "Small Solar", type: "auto", cost: 1200, power: 15, rate: 1.15, desc: "Harness the light." },
-        { name: "Wind Blade", type: "auto", cost: 5000, power: 50, rate: 1.16, desc: "Turbine infrastructure." },
-        { name: "Hydro Turbine", type: "auto", cost: 20000, power: 180, rate: 1.16, desc: "River-based flow." },
-        { name: "Coal Plant", type: "auto", cost: 85000, power: 650, rate: 1.17, desc: "Industrial output." },
-        { name: "Nuclear Fission", type: "auto", cost: 400000, power: 2800, rate: 1.17, desc: "Splitting atoms." },
-        { name: "Fusion Core", type: "auto", cost: 1500000, power: 9000, rate: 1.18, desc: "The power of stars." },
-        { name: "Antimatter Coil", type: "auto", cost: 10000000, power: 45000, rate: 1.19, desc: "Dangerous efficiency." },
-        { name: "Dyson Swarm", type: "auto", cost: 100000000, power: 250000, rate: 1.20, desc: "Total solar harvest." },
-        { name: "Void Siphon", type: "auto", cost: 1000000000, power: 1200000, rate: 1.22, desc: "Extraction from nothing." }
+    let watts = 0, totalEver = 0, level = 1, rebirths = 0;
+    const canvas = document.getElementById('fx-layer');
+    const ctx = canvas.getContext('2d');
+    
+    const catalog = [
+        { name: "Crank Handle", type: "click", cost: 15, power: 1, rate: 3.2, desc: "Manual energy generation." },
+        { name: "Lemon Battery", type: "auto", cost: 50, power: 1, rate: 1.15, desc: "Weak chemical reaction." },
+        { name: "Static Plate", type: "auto", cost: 400, power: 6, rate: 1.15, desc: "Harvesting friction." },
+        { name: "Copper Coil", type: "click", cost: 1200, power: 12, rate: 3.5, desc: "Higher conductivity." },
+        { name: "Solar Panel", type: "auto", cost: 2000, power: 25, rate: 1.16, desc: "Photon capture." },
+        { name: "Wind Turbine", type: "auto", cost: 10000, power: 80, rate: 1.17, desc: "Harness the gale." },
+        { name: "Coal Boiler", type: "auto", cost: 60000, power: 400, rate: 1.18, desc: "Old world burning." },
+        { name: "Nuclear Rod", type: "auto", cost: 250000, power: 1800, rate: 1.19, desc: "Fission stability." },
+        { name: "Plasma Tank", type: "auto", cost: 1000000, power: 8500, rate: 1.2, desc: "Superheated matter." },
+        { name: "Fusion Core", type: "auto", cost: 8000000, power: 45000, rate: 1.21, desc: "The power of stars." }
     ];
 
-    let owned = new Array(upgrades.length).fill(0);
+    let owned = new Array(catalog.length).fill(0);
 
-    function format(num) {
-        if (num < 1000) return Math.floor(num);
-        const suffixes = ["K", "M", "B", "T", "Qa", "Qi", "Sx"];
-        const suffixNum = Math.floor(("" + Math.floor(num)).length / 3);
-        let shortValue = parseFloat((suffixNum != 0 ? (num / Math.pow(1000, suffixNum)) : num).toPrecision(3));
-        if (shortValue % 1 != 0) shortValue = shortValue.toFixed(1);
-        return shortValue + suffixes[suffixNum - 1];
+    function format(n) {
+        if (n < 1000) return Math.floor(n);
+        let s = ["K", "M", "B", "T", "Qa", "Qi"];
+        let e = Math.floor(Math.log10(n) / 3);
+        return (n / Math.pow(1000, e)).toFixed(1) + s[e-1];
     }
 
     function init() {
+        resize();
         load();
-        createBattery();
-        setInterval(tick, 100);
+        window.addEventListener('resize', resize);
+        setInterval(gameTick, 100);
         setInterval(save, 5000);
         
-        window.addEventListener('keydown', (e) => { if(e.code === "Space") { e.preventDefault(); handleInteraction(window.innerWidth/3, window.innerHeight/2); }});
-        document.getElementById('core').addEventListener('mousedown', (e) => handleInteraction(e.clientX, e.clientY));
-        
+        window.addEventListener('keydown', (e) => { if(e.code === "Space") { e.preventDefault(); processClick(); }});
+        document.getElementById('core-btn').addEventListener('mousedown', (e) => processClick(e));
         renderShop();
     }
 
-    function handleInteraction(x, y) {
-        let mult = (1 + (level - 1) * 0.1) * Math.pow(3, rebirths);
-        let ppc = 1;
-        upgrades.forEach((u, i) => { if(u.type === 'click') ppc += (u.power * owned[i]); });
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+
+    function processClick(e) {
+        let mult = (1 + (level - 1) * 0.1) * Math.pow(4, rebirths);
+        let ppcBase = 1;
+        catalog.forEach((u, i) => { if(u.type === 'click') ppcBase += (u.power * owned[i]); });
         
-        let gain = ppc * mult;
-        watts += gain;
-        totalWatts += gain;
+        let val = ppcBase * mult;
+        watts += val;
+        totalEver += val;
         
-        pop(x, y, gain);
+        spark();
+        if(e) pop(e.clientX, e.clientY, val);
+        document.getElementById('shake-target').classList.add('shake');
+        setTimeout(() => document.getElementById('shake-target').classList.remove('shake'), 100);
         updateUI(mult);
     }
 
-    function pop(x, y, val) {
-        const words = ["ZAP!", "SURGE!", "VOLTS!", "SPARK!", "CORE!", "MAX!"];
-        const d = document.createElement('div');
-        d.className = 'float';
-        d.style.left = x + 'px';
-        d.style.top = y + 'px';
-        d.style.color = Math.random() > 0.5 ? 'var(--yellow)' : 'var(--orange)';
-        d.innerHTML = `+${format(val)}<br><small>${words[Math.floor(Math.random()*words.length)]}</small>`;
-        document.body.appendChild(d);
-        setTimeout(() => d.remove(), 700);
+    function spark() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = "#ffcc00";
+        ctx.lineWidth = 3;
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = "#ff6600";
+        ctx.beginPath();
+        let cx = window.innerWidth * 0.35, cy = window.innerHeight * 0.5;
+        ctx.moveTo(cx, cy);
+        for(let i=0; i<8; i++) {
+            cx += (Math.random() - 0.5) * 500;
+            cy += (Math.random() - 0.5) * 500;
+            ctx.lineTo(cx, cy);
+        }
+        ctx.stroke();
+        setTimeout(() => ctx.clearRect(0,0,canvas.width,canvas.height), 80);
     }
 
-    function tick() {
-        let mult = (1 + (level - 1) * 0.1) * Math.pow(3, rebirths);
+    function pop(x, y, v) {
+        const p = document.createElement('div');
+        p.className = 'pop';
+        p.style.left = x + 'px'; p.style.top = y + 'px';
+        p.innerText = "+" + format(v);
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 600);
+    }
+
+    function gameTick() {
+        let mult = (1 + (level - 1) * 0.1) * Math.pow(4, rebirths);
         let pps = 0;
-        upgrades.forEach((u, i) => { if(u.type === "auto") pps += (u.power * owned[i]); });
+        catalog.forEach((u, i) => { if(u.type === 'auto') pps += (u.power * owned[i]); });
         
         let gain = (pps * mult) / 10;
         watts += gain;
-        totalWatts += gain;
+        totalEver += gain;
         
-        checkLevel();
+        if (totalEver >= 100 * Math.pow(level, 2.5)) level++;
         updateUI(mult, pps);
     }
 
+    function updateUI(mult, pps = 0) {
+        document.getElementById('score-text').innerText = format(watts);
+        document.getElementById('pps-text').innerText = format(pps * mult) + " WATTS / SEC";
+        document.getElementById('level-txt').innerText = "UNIT LVL: " + level;
+        document.getElementById('stat-pps').innerText = format(pps * mult);
+        
+        let ppc = 1;
+        catalog.forEach((u, i) => { if(u.type === 'click') ppc += (u.power * owned[i]); });
+        document.getElementById('stat-ppc').innerText = format(ppc * mult);
+
+        let curReq = 100 * Math.pow(level-1, 2.5);
+        let nxtReq = 100 * Math.pow(level, 2.5);
+        let progress = ((totalEver - curReq) / (nxtReq - curReq)) * 100;
+        document.getElementById('battery-fill').style.width = Math.min(100, progress) + "%";
+        
+        // Refresh shop prices visually
+        const items = document.querySelectorAll('.item');
+        catalog.forEach((u, i) => {
+            let cost = Math.floor(u.cost * Math.pow(u.rate, owned[i]));
+            if (watts >= cost) items[i].classList.remove('locked');
+            else items[i].classList.add('locked');
+        });
+    }
+
     function buy(i) {
-        let cost = Math.floor(upgrades[i].cost * Math.pow(upgrades[i].rate, owned[i]));
+        let cost = Math.floor(catalog[i].cost * Math.pow(catalog[i].rate, owned[i]));
         if (watts >= cost) {
             watts -= cost;
             owned[i]++;
@@ -266,90 +308,31 @@
         }
     }
 
-    function checkLevel() {
-        let next = 100 * Math.pow(level, 2.4);
-        if (totalWatts >= next) level++;
-        document.getElementById('prestige-panel').style.display = (level >= 15) ? 'block' : 'none';
-    }
-
-    function createBattery() {
-        const container = document.getElementById('battery-segments');
-        container.innerHTML = '';
-        for(let i=0; i<20; i++) {
-            let s = document.createElement('div');
-            s.className = 'segment';
-            container.appendChild(s);
-        }
-    }
-
-    function updateUI(mult, pps = 0) {
-        document.getElementById('score-display').innerText = format(watts);
-        document.getElementById('pps-display').innerText = format(pps * mult) + " WATTS / SEC";
-        document.getElementById('stat-mult').innerText = mult.toFixed(1) + "x";
-        
-        let ppcBase = 1;
-        upgrades.forEach((u, i) => { if(u.type === 'click') ppcBase += (u.power * owned[i]); });
-        document.getElementById('stat-ppc').innerText = format(ppcBase * mult);
-
-        // Battery Logic
-        let currentLvlBase = 100 * Math.pow(level - 1, 2.4);
-        let nextLvlReq = 100 * Math.pow(level, 2.4);
-        let progress = (totalWatts - currentLvlBase) / (nextLvlReq - currentLvlBase);
-        
-        document.getElementById('lvl-display').innerText = `UNIT LEVEL: ${level}`;
-        document.getElementById('xp-display').innerText = `${format(totalWatts)} / ${format(nextLvlReq)} WATTS`;
-        
-        const segments = document.querySelectorAll('.segment');
-        segments.forEach((s, i) => {
-            if (i / segments.length < progress) s.classList.add('active');
-            else s.classList.remove('active');
-        });
-    }
-
     function renderShop() {
-        const container = document.getElementById('upgrade-list');
+        const container = document.getElementById('upgrade-container');
         container.innerHTML = '';
-        upgrades.forEach((u, i) => {
+        catalog.forEach((u, i) => {
             let cost = Math.floor(u.cost * Math.pow(u.rate, owned[i]));
-            let canAfford = watts >= cost;
             let item = document.createElement('div');
-            item.className = `item ${!canAfford ? 'locked' : ''} ${u.type === 'click' ? 'manual-type' : ''}`;
+            item.className = `item ${watts < cost ? 'locked' : ''}`;
             item.onclick = () => buy(i);
             item.innerHTML = `
                 <div class="item-info">
-                    <h4>${u.name}</h4>
+                    <h4>${u.name} [Lv.${owned[i]}]</h4>
                     <p>${u.desc}</p>
                 </div>
-                <div class="item-price">
-                    <span class="price-val">${format(cost)}</span>
-                    <span class="owned-count">LVL ${owned[i]}</span>
-                </div>
+                <div class="item-cost">${format(cost)} W</div>
             `;
             container.appendChild(item);
         });
     }
 
-    function rebirth() {
-        if(confirm("SYSTEM OVERCLOCK? Grid will reset, but global power increases by 300%!")) {
-            rebirths++;
-            watts = 0;
-            totalWatts = 0;
-            level = 1;
-            owned.fill(0); // FIXED: Actually resets progress now!
-            save();
-            location.reload();
-        }
-    }
-
-    function save() { localStorage.setItem('skit_overdrive_v1', JSON.stringify({watts, totalWatts, level, rebirths, owned})); }
+    function save() { localStorage.setItem('skit_v5_data', JSON.stringify({watts, totalEver, level, rebirths, owned})); }
     function load() {
-        let data = JSON.parse(localStorage.getItem('skit_overdrive_v1'));
-        if(data) {
-            watts = data.watts || 0;
-            totalWatts = data.totalWatts || 0;
-            level = data.level || 1;
-            rebirths = data.rebirths || 0;
-            owned = data.owned || owned;
+        let d = JSON.parse(localStorage.getItem('skit_v5_data'));
+        if(d && d.owned) {
+            watts = d.watts; totalEver = d.totalEver; 
+            level = d.level; rebirths = d.rebirths; owned = d.owned;
         }
     }
 
